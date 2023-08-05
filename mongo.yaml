@@ -1,0 +1,63 @@
+# Create Mongo DB Pod
+apiVersion: apps/v1
+# Create a deployment.
+kind: Deployment
+metadata:
+#   Name this deployment mongodb-deployment.
+    name: mongodb-deployment
+    # Make the app label 'mongodb' available for the specifications.
+    labels:
+        app: mongodb
+spec:
+#   This deployment will create one replica aka pod.
+    replicas: 1
+    selector:
+    # The selector will make matchLable's labels available to the pods.
+        matchLabels:
+            app: mongodb
+    # Template is the template to build each pod.
+    template:
+      # Each pod will have the app label 'mongodb' available to select.
+      metadata:
+          labels:
+              app: mongodb
+      # Specification for each node.
+      spec:
+        # Each node will house a container named 'mongodb' with
+        #  the mongo image.
+        containers:
+        - name: mongodb
+          image: mongo
+          ports: 
+          # The port the images use are found in the Docker documentation.
+          - containerPort: 27017
+          # Environmental variables hold credentials from kubernetes secret config
+          # mongo-secret that not repo.
+          env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: mongo-root-username
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: mongo-root-password
+--- # Three dashes to create new document.
+# Create Internal Service
+apiVersion: v1
+# Create a Service document.
+kind: Service
+metadata:
+# Call it mongodb-service.
+  name: mongodb-service
+spec:
+# The Service will choose the pod from the app 'mongodb' 
+  selector:
+    app: mongodb
+# The Service will listen to the pod's containerPort 
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
