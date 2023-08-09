@@ -61,3 +61,17 @@ spec:
     - protocol: TCP
       port: 27017
       targetPort: 27017
+---
+# Create Internal Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-internal-service
+spec:
+  selector:
+    app: mongo-external
+  ports:
+    # External Service needs two ports for the internal and external IP address.
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017

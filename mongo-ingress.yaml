@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+
+---
+# This is the front door to access the MongoDB Container.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mongo-ingress
+  namespace: kube-system
+spec:
+  ingressClassName: nginx
+  rules:
+  # Must be configured to the computure's host file to view via browser. The mapping
+  #  the Ingress's address to the name placed here.
+  - host: dashboard.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        # The internal service being accessed.
+        backend:
+          service: 
+            name: mongo-internal-service
+            port: 
+              number: 27017

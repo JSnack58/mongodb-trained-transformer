@@ -1,0 +1,68 @@
+# Create Mongo Express Pod
+apiVersion: apps/v1
+kind: Deployment
+# Name this deployment mongo-express
+metadata:
+    name: mongo-external
+    # Make the app label 'mongodb' available for the specifications.
+    labels:
+        app: mongo-external
+spec:
+#   This deployment will create one replica aka pod.
+    replicas:  1
+    selector:
+    # The selector will make matchLabel's labels available to the pods.
+        matchLabels:
+            app: mongo-external
+    # Each pod will be built from this template
+    template:
+        # Each pod will have the app label 'mongodb' available to select.
+        metadata:
+            labels:
+                app: mongo-external
+      # Specification for each node.
+        spec:
+        # Each node will house a container named 'mongodb' with
+        #  the mongo image.
+            containers:
+            - name: mongo-external
+              image: jsnack58/mongo-external-service:version1.322
+              ports:
+            # MongoExpress port found in the Docker documentation.
+              - containerPort: 8082
+            # The credentials required to connect with MongoDB
+              env:
+              - name: ME_CONFIG_MONGODB_ADMINUSERNAME 
+                valueFrom:
+                  secretKeyRef:
+                      name: mongodb-secret
+                      key: mongo-root-username
+              - name: ME_CONFIG_MONGODB_ADMINPASSWORD 
+                valueFrom:
+                  secretKeyRef:
+                      name: mongodb-secret
+                      key: mongo-root-password
+                # The service this external service will connect to.
+              - name: ME_CONFIG_MONGODB_SERVER
+                valueFrom:
+                # Values created in the config map for flexibility.
+                  configMapKeyRef:
+                    name: mongodb-configmap
+                    key: database_url
+---
+# Create External Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-external-service
+spec:
+  selector:
+    app: mongo-external
+  type: LoadBalancer
+  ports:
+    # External Service needs two ports for the internal and external IP address.
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+      nodePort: 31000
+
