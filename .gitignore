@@ -1,2 +1,4 @@
 .ipynb_checkpoints
 mongo-secret.yaml
+package-lock.json
+node_modules
