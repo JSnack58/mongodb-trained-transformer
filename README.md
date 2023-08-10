@@ -1,5 +1,6 @@
 Prerequistes:
     Kubernetes installed with minikube
+    Install ingress like nginx
     Create Kubernetes cluster via 'minikube start'
 Steps
     Clone repository.
